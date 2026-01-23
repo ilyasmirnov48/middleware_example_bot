@@ -1,6 +1,9 @@
 import asyncio
 import logging
 
+from lexicon.lexicon_en import LEXICON_EN
+from lexicon.lexicon_ru import LEXICON_RU
+from middlewares.outer import TranslatorMiddleware
 from aiogram import Bot, Dispatcher
 from config.config import Config, load_config
 from handlers.other import other_router
@@ -8,15 +11,23 @@ from handlers.user import user_router
 # from middlewares.inner import (
 #     FirstInnerMiddleware,
 #     SecondInnerMiddleware,
-#     ThirdInnerMiddlesare
+#     ThirdInnerMiddleware
 # )
 from middlewares.outer import (
-    FirstOuterMiddleware,
+    TranslatorMiddleware,
+#     FirstOuterMiddleware,
 #     SecondOuterMiddleware,
-#     ThirdOuterMiddlesare
+#     ThirdOuterMiddleware
 )
 
 logger = logging.getLogger(__name__)
+
+
+translations = {
+    'default': 'en',
+    'en': LEXICON_EN,
+    'ru': LEXICON_RU,
+}
 
 
 async def main() -> None:
@@ -34,9 +45,9 @@ async def main() -> None:
     dp.include_router(user_router)
     dp.include_router(other_router)
 
-    dp.update.outer_middleware(FirstOuterMiddleware())
+    dp.update.middleware(TranslatorMiddleware())
 
-    await dp.start_polling(bot)
+    await dp.start_polling(bot, translations=translations)
 
 
 asyncio.run(main())
